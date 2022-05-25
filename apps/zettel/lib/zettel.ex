@@ -11,6 +11,21 @@ defmodule Zettel do
     def new(target, style: style), do: %Link{target: target, title: target, style: style}
     def new(target, title), do: %Link{target: target, title: title}
     def new(target, title, style: style), do: %Link{target: target, title: title, style: style}
+
+    def from_wiki_match([_, middle]) do
+      case String.split(middle, "|") do
+        [target, title] -> Link.new(target, title, style: :wiki)
+        [target] -> Link.new(target, style: :wiki)
+      end
+    end
+
+    def from_md_match([_, title, target]) do
+      Link.new(target, title, style: :markdown)
+    end
+
+    def from_mdref_match([_, identifier, url]) do
+      Link.new(url, identifier, style: :reference)
+    end
   end
 
 
@@ -32,36 +47,22 @@ defmodule Zettel do
   end
 
   @spec find_wikilink(String.t()) :: [Link]
-  def find_wikilink(content) do
+  defp find_wikilink(content) do
     Regex.scan(@wikilink, content)
-    |> Enum.map(&wiki_grp_to_link/1)
+    |> Enum.map(&Link.from_wiki_match/1)
   end
 
   @spec find_mdlink(String.t()) :: [Link]
-  def find_mdlink(content) do
+  defp find_mdlink(content) do
     Regex.scan(@mdlink, content)
-    |> Enum.map(&md_grp_to_link/1)
+    |> Enum.map(&Link.from_md_match/1)
   end
 
   @spec find_mdref(String.t()) :: [Link]
-  def find_mdref(content) do
+  defp find_mdref(content) do
     Regex.scan(@mdref, content)
-    |> Enum.map(&mdref_grp_to_link/1)
+    |> Enum.map(&Link.from_mdref_match/1)
   end
 
-  defp wiki_grp_to_link([_, middle]) do
-    case String.split(middle, "|") do
-      [target, title] -> Link.new(target, title, style: :wiki)
-      [target] -> Link.new(target, style: :wiki)
-    end
-  end
-
-  defp md_grp_to_link([_, title, target]) do
-    Link.new(target, title, style: :markdown)
-  end
-
-  defp mdref_grp_to_link([_, identifier, url]) do
-    Link.new(url, identifier, style: :reference)
-  end
 
 end

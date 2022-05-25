@@ -7,11 +7,31 @@ defmodule Zettel do
     @enforce_keys [:target, :title]
     defstruct [:target, :title, :style]
 
+    @doc """
+    Create a new Link from `target` with optional `title` and `:style`
+    """
     def new(target), do: %Link{target: target, title: target}
     def new(target, style: style), do: %Link{target: target, title: target, style: style}
     def new(target, title), do: %Link{target: target, title: title}
     def new(target, title, style: style), do: %Link{target: target, title: title, style: style}
 
+    @doc """
+    Convert a link to a string matching the style and link data.
+    """
+    def to_string(link) do
+      case link.style do
+        :wiki -> if link.title == link.target do
+            "[[#{link.target}]]" 
+          else 
+            "[[#{link.target}|#{link.title}]]"
+          end
+        :markdown -> "[#{link.title}](#{link.target})"
+        :reference -> "[#{link.title}]: #{link.target}"
+        _ -> ""
+      end
+    end
+    ## Conversion functions from regex matches
+    
     def from_wiki_match([_, middle]) do
       case String.split(middle, "|") do
         [target, title] -> Link.new(target, title, style: :wiki)

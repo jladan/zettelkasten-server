@@ -5,15 +5,20 @@ defmodule Zettel do
 
   defmodule Link do
     @enforce_keys [:target, :title]
-    defstruct [:target, :title, :style]
+    defstruct [:target, :title, :style, :original, :location]
 
     @doc """
     Create a new Link from `target` with optional `title` and `:style`
     """
     def new(target), do: %Link{target: target, title: target}
-    def new(target, style: style), do: %Link{target: target, title: target, style: style}
+    def new(target, opts) when is_list(opts), do: new(target, target, opts)
     def new(target, title), do: %Link{target: target, title: title}
-    def new(target, title, style: style), do: %Link{target: target, title: title, style: style}
+    def new(target, title, opts) when is_list(opts) do
+      style = Keyword.get(opts, :style, nil)
+      original = Keyword.get(opts, :original, nil)
+      location = Keyword.get(opts, :location, nil)
+      %Link{target: target, title: title, style: style, original: original, location: location}
+    end
 
     @doc """
     Convert a link to a string matching the style and link data.

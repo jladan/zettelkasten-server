@@ -5,7 +5,12 @@ defmodule Zettel do
 
   defmodule Link do
     @enforce_keys [:target, :title]
-    defstruct [:target, :title]
+    defstruct [:target, :title, :style]
+
+    def new(target), do: %Link{target: target, title: target}
+    def new(target, style: style), do: %Link{target: target, title: target, style: style}
+    def new(target, title), do: %Link{target: target, title: title}
+    def new(target, title, style: style), do: %Link{target: target, title: title, style: style}
   end
 
 
@@ -22,7 +27,8 @@ defmodule Zettel do
   """
   @spec find_links(String.t()) :: [Link]
   def find_links(content) do
-    [[]]
+    [&find_wikilink/1, &find_mdlink/1, &find_mdref/1]
+    |> Enum.flat_map(fn f -> f.(content) end)
   end
 
   @spec find_wikilink(String.t()) :: [Link]
@@ -45,17 +51,17 @@ defmodule Zettel do
 
   defp wiki_grp_to_link([_, middle]) do
     case String.split(middle, "|") do
-      [target, title] -> %Link{target: target, title: title}
-      [target] -> %Link{target: target, title: target}
+      [target, title] -> Link.new(target, title, style: :wiki)
+      [target] -> Link.new(target, style: :wiki)
     end
   end
 
   defp md_grp_to_link([_, title, target]) do
-    %Link{target: target, title: title}
+    Link.new(target, title, style: :markdown)
   end
 
   defp mdref_grp_to_link([_, identifier, url]) do
-    %Link{target: url, title: identifier}
+    Link.new(url, identifier, style: :reference)
   end
 
 end

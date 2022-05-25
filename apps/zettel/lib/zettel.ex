@@ -3,10 +3,11 @@ defmodule Zettel do
   Documentation for `Zettel`.
   """
 
-  @type link :: %{
-    target: String.t,
-    title: String.t
-  }
+  defmodule Link do
+    @enforce_keys [:target, :title]
+    defstruct [:target, :title]
+  end
+
 
   # a wiki-style link [[target is the title]]
   @wikilink ~r/\[\[(.+?)\]\]/
@@ -19,24 +20,24 @@ defmodule Zettel do
   @doc """
   Find links inside of a string.
   """
-  @spec find_links(String.t()) :: [link]
+  @spec find_links(String.t()) :: [Link]
   def find_links(content) do
     [[]]
   end
 
-  @spec find_wikilink(String.t()) :: [link]
+  @spec find_wikilink(String.t()) :: [Link]
   def find_wikilink(content) do
     Regex.scan(@wikilink, content)
     |> Enum.map(&wiki_grp_to_link/1)
   end
 
-  @spec find_mdlink(String.t()) :: [link]
+  @spec find_mdlink(String.t()) :: [Link]
   def find_mdlink(content) do
     Regex.scan(@mdlink, content)
     |> Enum.map(&md_grp_to_link/1)
   end
 
-  @spec find_mdref(String.t()) :: [link]
+  @spec find_mdref(String.t()) :: [Link]
   def find_mdref(content) do
     Regex.scan(@mdref, content)
     |> Enum.map(&mdref_grp_to_link/1)
@@ -44,17 +45,17 @@ defmodule Zettel do
 
   defp wiki_grp_to_link([_, middle]) do
     case String.split(middle, "|") do
-      [target, title] -> %{target: target, title: title}
-      [target] -> %{target: target, title: target}
+      [target, title] -> %Link{target: target, title: title}
+      [target] -> %Link{target: target, title: target}
     end
   end
 
   defp md_grp_to_link([_, title, target]) do
-    %{target: target, title: title}
+    %Link{target: target, title: title}
   end
 
   defp mdref_grp_to_link([_, identifier, url]) do
-    %{target: url, title: identifier}
+    %Link{target: url, title: identifier}
   end
 
 end

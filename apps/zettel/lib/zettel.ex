@@ -56,6 +56,10 @@ defmodule Zettel do
     end
   end
 
+  @doc """
+  Read a file, and extract all the links from it.
+  """
+  @spec from_file(String.t()) :: Zettel
   def from_file(path) do
     links = File.read!(path)
             |> find_links()

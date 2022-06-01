@@ -53,6 +53,18 @@ defmodule Kasten do
       Map.update(set, bname, MapSet.new([absname]), &MapSet.put(&1, absname))
     end
 
+    def shortest_name(set, fname) do
+      with bname <- :filename.basename(fname),
+           absname = :filename.absname(fname),
+           {:ok, s} <- Map.fetch(set, bname) do
+        if MapSet.member?(s, absname) do
+          if MapSet.size(s) == 1, do: bname, else: absname
+        else
+          :error
+        end
+      end
+    end
+
     def member?(set, fname) do
       with bname <- :filename.basename(fname),
            absname <- :filename.absname(fname),

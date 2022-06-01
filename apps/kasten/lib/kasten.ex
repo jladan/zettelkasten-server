@@ -3,6 +3,13 @@ defmodule Kasten do
   Documentation for `Kasten`.
   """
 
+  @doc """
+  Scan a directory for all files underneath it
+
+  options:
+    - :show_hidden (bool, default: false) include hidden files
+    - :follow_links (bool, default: false) follow links (unimplemented)
+  """
   def scan_dir(path, opts \\ []) do
     _scan_dir([path], _scan_opts(opts))
     |> List.flatten()

@@ -10,8 +10,12 @@ defmodule Kasten do
     - :show_hidden (bool, default: false) include hidden files
     - :follow_links (bool, default: false) follow links (unimplemented)
   """
-  def scan_dir(path, opts \\ []) do
-    _scan_dir([path], _scan_opts(opts))
+  def scan_dir(path \\ ".", opts \\ []) do
+    if path == "." do
+      _scan_dir(File.ls!(), _scan_opts(opts))
+    else
+      _scan_dir([path], _scan_opts(opts))
+    end
     |> List.flatten()
   end
 

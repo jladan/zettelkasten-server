@@ -1,55 +1,31 @@
 defmodule Zettel do
   @moduledoc """
-  Documentation for `Zettel`.
+  Zettel (index card) state, implementing Agent OTP spec
   """
-  defstruct [:filename, links: [], backlinks: []]
-
-  alias Zettel.Link
+  use Agent
 
   @doc """
-  Read a file, and extract all the links from it.
+  Start a new Zettel process.
   """
-  @spec from_file(String.t()) :: Zettel
-  def from_file(path) do
-    links = File.read!(path)
-            |> find_links()
-    %Zettel{filename: path, links: links}
+  def start_link(opts) do
+    case Keyword.fetch(opts, :filename) do
+      {:ok, fname} -> Agent.start_link(fn -> Zettel.State.from_file(fname) end)
+      {:error} -> Agent.start_link(fn -> Zettel.State.new() end)
+    end
   end
-
-  # a wiki-style link [[target is the title]]
-  @wikilink ~r/\[\[(.+?)\]\]/
-  # A markdown inline link [Title](url)
-  @mdlink ~r/\[(.*?)\]\((.+?)\)/
-  # A markdown reference link [identifier]: url title
-  # XXX the optional title is not implemented here
-  @mdref ~r/\[(.+?)\]:\s+(.*)$/
-
+  
   @doc """
-  Find links of all kinds inside of a string.
+  Get the filename of a card.
   """
-  @spec find_links(String.t()) :: [Link]
-  def find_links(content) do
-    [&find_wikilink/1, &find_mdlink/1, &find_mdref/1]
-    |> Enum.flat_map(fn f -> f.(content) end)
+  def filename(zettel) do
+    Agent.get(zettel, &(&1.filename))
   end
-
-  @spec find_wikilink(String.t()) :: [Link]
-  defp find_wikilink(content) do
-    Regex.scan(@wikilink, content)
-    |> Enum.map(&Link.from_wiki_match/1)
+  
+  @doc """
+  Get the list of links.
+  """
+  def links(zettel) do
+    Agent.get(zettel, &(&1.links))
   end
-
-  @spec find_mdlink(String.t()) :: [Link]
-  defp find_mdlink(content) do
-    Regex.scan(@mdlink, content)
-    |> Enum.map(&Link.from_md_match/1)
-  end
-
-  @spec find_mdref(String.t()) :: [Link]
-  defp find_mdref(content) do
-    Regex.scan(@mdref, content)
-    |> Enum.map(&Link.from_mdref_match/1)
-  end
-
 
 end

@@ -10,6 +10,9 @@ defmodule Zettel.State do
     %Zettel.State{filename: "test", links: [1,2,3]}
   end
   
+  def add_backlink(state, source) do
+    Map.update!(state, :backlinks, &([source | &1]))
+  end
 
   @doc """
   Read a file, and extract all the links from it.

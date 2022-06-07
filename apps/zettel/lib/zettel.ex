@@ -4,6 +4,8 @@ defmodule Zettel do
   """
   use Agent
 
+  @type zettel :: pid()
+
   @doc """
   Start a new Zettel process.
   """
@@ -26,6 +28,21 @@ defmodule Zettel do
   """
   def links(zettel) do
     Agent.get(zettel, &(&1.links))
+  end
+
+  @doc """
+  Retrieve the list of backlinks.
+  """
+  def backlinks(zettel) do
+    Agent.get(zettel, &(&1.backlinks))
+  end
+
+  @doc """
+  Add a backlink to a card.
+  """
+  @spec backlink(zettel, String.t()) :: :ok
+  def backlink(zettel, source) do
+    Agent.update(zettel, Zettel.State, :add_backlink, [source])
   end
 
 end

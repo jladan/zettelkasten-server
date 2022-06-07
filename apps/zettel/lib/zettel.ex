@@ -12,7 +12,7 @@ defmodule Zettel do
   def start_link(opts) do
     case Keyword.fetch(opts, :filename) do
       {:ok, fname} -> Agent.start_link(fn -> Zettel.State.from_file(fname) end)
-      {:error} -> Agent.start_link(fn -> Zettel.State.new() end)
+      :error -> Agent.start_link(fn -> Zettel.State.new() end)
     end
   end
   

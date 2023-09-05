@@ -1,6 +1,8 @@
 # Zettelkasten
 
-**Work in progress**
+**Abandoned version** When development started again, I decided that the app
+architecture was bad, so I started from fresh
+[here](https://github.com/jladan/zkserver).
 
 This is a service to help track and maintain a zettelkasten-style filesystem.
 
